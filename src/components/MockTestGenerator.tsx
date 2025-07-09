@@ -79,7 +79,7 @@ export function MockTestGenerator() {
       const prompt = `You are an expert UPSC PSIR paper-setter. Create a ${remainingQuestions > 0 ? remainingQuestions : 20}-question UPSC-style mock test for PSIR ${selectedPaperInfo?.label}. Follow these rules:
 
 ${customCount > 0 ? `- Include these ${customCount} custom questions exactly as provided: ${customQuestionsArray.join(' | ')}` : ''}
-${articleCount > 0 ? `- Generate 1 high-quality question per article based on its core theme for these URLs: ${articleLinksArray.join(', ')}. IMPORTANT: Do NOT mention the article, its title, author, or source in the question. Frame it as a general UPSC question based on the theme.` : ''}
+${articleCount > 0 ? `- For these article URLs: ${articleLinksArray.join(', ')} - FIRST use web search to read and understand the complete content of each article. Then generate 1 high-quality UPSC question per article based on the core themes, arguments, and insights from the article content. IMPORTANT: Do NOT mention the article, its title, author, or source in the question. Frame it as a general UPSC question that tests understanding of the concepts discussed in the article.` : ''}
 ${topicCount > 0 ? `- Ensure 1 question per topic is included for: ${topicsArray.join(', ')}` : ''}
 
 ${remainingQuestions > 0 ? `Generate ${remainingQuestions} additional questions from across the syllabus of the selected paper, with weightage based on past UPSC trends:
