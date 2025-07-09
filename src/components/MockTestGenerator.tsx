@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, FileText, Copy, Download, BookOpen, PenTool } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, FileText, Copy, Download, BookOpen, PenTool, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface GeneratedTest {
@@ -21,11 +22,20 @@ const PAPERS = [
   { value: '2B', label: 'Paper 2B (India & World, Global Issues)' },
 ];
 
+const PREVIOUS_YEAR_QUESTIONS = [
+  { id: 'pyq1', text: '"Human rights debate is caught between the limitations of universalism and cultural relativism." Elaborate.' },
+  { id: 'pyq2', text: '"Does the actual working of Indian federalism conform to the centralising tendencies in Indian polity?" Discuss.' },
+  { id: 'pyq3', text: 'Identify the major differences between the classical realism of Hans J. Morgenthau and the neorealism of Kenneth Waltz. Which approach is best suited for analyzing international relations after the Cold War?' },
+  { id: 'pyq4', text: '"The Panchayats with Gram Sabhas should be so organised as to identify the resources locally available for the development in agricultural and industrial sectors." Examine the statement in the context of Gram Swaraj.' },
+  { id: 'pyq5', text: 'Discuss the main limitations of the comparative method to the study of Political Science.' },
+];
+
 export function MockTestGenerator() {
   const [selectedPaper, setSelectedPaper] = useState('');
   const [customQuestions, setCustomQuestions] = useState('');
   const [articleLinks, setArticleLinks] = useState('');
   const [specificTopics, setSpecificTopics] = useState('');
+  const [selectedPYQs, setSelectedPYQs] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTest, setGeneratedTest] = useState<GeneratedTest | null>(null);
   const [apiKey, setApiKey] = useState('');
@@ -69,10 +79,16 @@ export function MockTestGenerator() {
         .filter(topic => topic.trim())
         .map(topic => topic.trim());
 
+      // Get selected PYQ texts
+      const selectedPYQTexts = selectedPYQs.map(id => 
+        PREVIOUS_YEAR_QUESTIONS.find(pyq => pyq.id === id)?.text || ''
+      ).filter(text => text);
+
       const customCount = customQuestionsArray.length;
       const articleCount = articleLinksArray.length;
       const topicCount = topicsArray.length;
-      const remainingQuestions = Math.max(0, 20 - customCount - articleCount - topicCount);
+      const pyqCount = selectedPYQTexts.length;
+      const remainingQuestions = Math.max(0, 20 - customCount - articleCount - topicCount - pyqCount);
 
       const selectedPaperInfo = PAPERS.find(p => p.value === selectedPaper);
 
@@ -81,6 +97,7 @@ export function MockTestGenerator() {
 ${customCount > 0 ? `- Include these ${customCount} custom questions exactly as provided: ${customQuestionsArray.join(' | ')}` : ''}
 ${articleCount > 0 ? `- For these article URLs: ${articleLinksArray.join(', ')} - FIRST use web search to read and understand the complete content of each article. Then generate 1 high-quality UPSC question per article based on the core themes, arguments, and insights from the article content. IMPORTANT: Do NOT mention the article, its title, author, or source in the question. Frame it as a general UPSC question that tests understanding of the concepts discussed in the article.` : ''}
 ${topicCount > 0 ? `- Ensure 1 question per topic is included for: ${topicsArray.join(', ')}` : ''}
+${pyqCount > 0 ? `- Include these ${pyqCount} previous year questions exactly as provided: ${selectedPYQTexts.join(' | ')}` : ''}
 
 ${remainingQuestions > 0 ? `Generate ${remainingQuestions} additional questions from across the syllabus of the selected paper, with weightage based on past UPSC trends:
 - Common themes like justice, equality, realism, globalisation, Indian secularism, federalism, IR theories should appear more.
@@ -130,8 +147,8 @@ Format: Return as a numbered list (1. Question text)`;
         .filter((line: string) => line.match(/^\d+\./))
         .map((line: string) => line.replace(/^\d+\.\s*/, '').trim());
 
-      // Add custom questions at the beginning if any
-      const allQuestions = [...customQuestionsArray, ...questions];
+      // Combine all questions: custom, PYQs, and generated
+      const allQuestions = [...customQuestionsArray, ...selectedPYQTexts, ...questions];
 
       setGeneratedTest({
         questions: allQuestions.slice(0, 20), // Ensure exactly 20 questions
@@ -299,6 +316,45 @@ Format: Return as a numbered list (1. Question text)`;
                 <p className="text-sm text-muted-foreground">
                   Comma-separated topics. One question will be generated per topic.
                 </p>
+              </div>
+
+              {/* Previous Year Questions */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Include Previous Year Question(s) (Optional)
+                </Label>
+                <div className="border rounded-md p-3 bg-background space-y-3 max-h-64 overflow-y-auto">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Choose 1 or more to insert into your mock test
+                  </p>
+                  {PREVIOUS_YEAR_QUESTIONS.map((pyq) => (
+                    <div key={pyq.id} className="flex items-start space-x-3">
+                      <Checkbox
+                        id={pyq.id}
+                        checked={selectedPYQs.includes(pyq.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedPYQs([...selectedPYQs, pyq.id]);
+                          } else {
+                            setSelectedPYQs(selectedPYQs.filter(id => id !== pyq.id));
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor={pyq.id}
+                        className="text-sm leading-relaxed cursor-pointer flex-1"
+                      >
+                        {pyq.text}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                {selectedPYQs.length > 0 && (
+                  <p className="text-sm text-primary">
+                    Selected: {selectedPYQs.length} question{selectedPYQs.length > 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
 
               {/* Generate Button */}
