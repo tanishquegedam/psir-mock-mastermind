@@ -210,6 +210,15 @@ Format: Return as a numbered list (1. Question text)`;
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
+          {/* Brand Logo */}
+          <div className="mb-6">
+            <img 
+              src="/lovable-uploads/b0b1863b-835c-4fd2-88f3-fa90e09eee41.png" 
+              alt="Shubhra Ranjan - Always Ahead" 
+              className="h-16 mx-auto object-contain"
+            />
+          </div>
+          
           <div className="flex items-center justify-center gap-3 mb-4">
             <BookOpen className="h-8 w-8 text-primary" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-academic bg-clip-text text-transparent">
